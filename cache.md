@@ -397,7 +397,7 @@ We just need to implement each of these methods using a MongoDB connection. For 
 <a name="registering-the-driver"></a>
 ### Registering The Driver
 
-To register the custom cache driver with Laravel, we will use the `extend` method on the `Cache` facade. The call to `Cache::extend` could be done in the `boot` method of the default `App\Providers\AppServiceProvider` that ships with fresh Laravel applications, or you may create your own service provider to house the extension - just don't forget to register the provider in the `config/app.php` provider array:
+To register the custom cache driver with Laravel, we will use the `extend` method on the `Cache` facade. The call to `Cache::extend` could be done in the `register` method of the default `App\Providers\AppServiceProvider` that ships with fresh Laravel applications, or you may create your own service provider to house the extension - just don't forget to register the provider in the `config/app.php` provider array:
 
     <?php
 
@@ -416,7 +416,11 @@ To register the custom cache driver with Laravel, we will use the `extend` metho
          */
         public function register()
         {
-            //
+            $this->app->booting(function () {
+                Cache::extend('mongo', function ($app) {
+                    return Cache::repository(new MongoStore);
+                });
+            });
         }
 
         /**
@@ -426,9 +430,7 @@ To register the custom cache driver with Laravel, we will use the `extend` metho
          */
         public function boot()
         {
-            Cache::extend('mongo', function ($app) {
-                return Cache::repository(new MongoStore);
-            });
+            //
         }
     }
 
